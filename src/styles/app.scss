@@ -1,0 +1,40 @@
+
+// Fonts
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@700&display=swap');
+
+//font awesome
+@import '@fortawesome/fontawesome-free/css/fontawesome.css';
+@import '@fortawesome/fontawesome-free/css/regular.css';
+@import '@fortawesome/fontawesome-free/css/brands.css';
+@import '@fortawesome/fontawesome-free/css/solid.css';
+
+// Fichier de styles globaux
+
+// Import de Bootstrap
+@import "bootstrap/dist/css/bootstrap.min.css";
+
+// Import de Font Awesome (si nécessaire)
+@import "@fortawesome/fontawesome-free/css/all.min.css";
+
+// Variables personnalisées
+:root {
+  --primary-color: #4285F4;
+  --dark-blue: #0a142b;
+  --light-text: #a8b8d8;
+}
+
+// Import Bootstrap
+@import 'bootstrap/dist/css/bootstrap.css';
+
+// Règles globales pour éliminer les espaces blancs indésirables
+body, html {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+// Fix pour l'espace blanc sous la navbar
+.navbar + * {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}

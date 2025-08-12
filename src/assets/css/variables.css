@@ -1,0 +1,13 @@
+:root {
+  --primary: #4285F4;
+  --secondary: #34A853;
+  --accent: #EA4335;
+  --yellow: #FBBC05;
+  --light: #F8F9FA;
+  --dark: #0f172a;
+  --darker: #0a0f1d;
+  --gray: #5F6368;
+  --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --glass: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.1);
+}

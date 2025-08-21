@@ -98,8 +98,8 @@ export default defineComponent({
           this.$store.commit('SET_AUTH_STATUS', true);
           this.$store.commit('SET_USER', response.data.data.user);
 
-          // Rediriger vers le tableau de bord
-          this.$router.push('/dashboard');
+          // Rediriger vers la page des statistiques au lieu du tableau de bord par défaut
+          this.$router.push('/dashboard/statistiques');
         } else {
           // Afficher le message d'erreur de l'API
           this.errorMessage = response.data?.message || 'Erreur lors de l\'authentification.';

@@ -132,30 +132,61 @@ export default defineComponent({
             return icons[ext] || 'fas fa-file';
         },
         downloadDocument() {
-            const link = document.createElement('a');
-            link.href = this.displayUrl;
-            link.download = this.document.nom;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            this.$toast.add({
-                severity: 'success',
-                summary: 'Téléchargement',
-                detail: 'Le téléchargement a démarré.',
-                life: 3000
-            });
+            try {
+                // Utiliser la route spécifique pour le téléchargement
+                const downloadUrl = `/api/documents/${this.document.id}/download`;
+                
+                // Créer un lien et simuler un clic pour déclencher le téléchargement
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = downloadUrl;
+                a.setAttribute('download', this.document.nom || 'document');
+                
+                // Ajouter au DOM et simuler un clic
+                document.body.appendChild(a);
+                a.click();
+                
+                // Nettoyer
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                }, 100);
+                
+                this.$toast.add({
+                    severity: 'success',
+                    summary: 'Téléchargement',
+                    detail: 'Le téléchargement a démarré.',
+                    life: 3000
+                });
+            } catch (error) {
+                console.error('Erreur lors du téléchargement:', error);
+                this.$toast.add({
+                    severity: 'error',
+                    summary: 'Erreur',
+                    detail: 'Erreur lors du téléchargement du fichier.',
+                    life: 3000
+                });
+            }
         },
         shareDocument() {
-            this.$dialog.open(ShareDocument, {
-                props: {
-                    header: 'Partager le document',
-                    style: { width: '50vw' },
-                    modal: true,
-                },
-                data: {
-                    document: this.document
-                }
-            });
+            // Stocker les informations du document avant de fermer la vue
+            const documentToShare = { ...this.document };
+            
+            // Fermer immédiatement la vue détaillée pour une meilleure expérience utilisateur
+            this.dialogRef.close();
+            
+            // Ouvrir le formulaire de partage après un court délai pour assurer la fermeture de la vue
+            setTimeout(() => {
+                this.$dialog.open(ShareDocument, {
+                    props: {
+                        header: 'Partager le document',
+                        style: { width: '50vw' },
+                        modal: true,
+                    },
+                    data: {
+                        document: documentToShare
+                    }
+                });
+            }, 100);
         },
         deleteDocument() {
             // Stocker les informations du document avant de fermer la vue

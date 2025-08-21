@@ -79,7 +79,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: 'gestionutilisateur',
         name: 'gestionutilisateur',
-        component: () => import('../views/dashboard/gestion utilisateur/ListeView.vue')
+        component: () => import('../views/dashboard/gestion utilisateur/indexutilisateurView.vue')
       },
       {
         path: 'gestionutilisateur/show/:id',

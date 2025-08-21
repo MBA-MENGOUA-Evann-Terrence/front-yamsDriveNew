@@ -1,45 +1,21 @@
 <template>
-  <div class="favoris-view">
-    <h1 class="page-title">Favoris</h1>
-    <div class="favoris-container">
-      <p class="placeholder-text">Vos fichiers favoris s'afficheront ici</p>
-    </div>
+  <div>
+    <IndexFavori />
   </div>
 </template>
 
-<script lang="ts">
+<script>
 import { defineComponent } from 'vue'
+import IndexFavori from './indexFavoriView.vue'
 
 export default defineComponent({
-  name: 'FavorieView'
+  name: 'FavorieView',
+  components: {
+    IndexFavori
+  }
 })
 </script>
 
 <style scoped>
-.favoris-view {
-  padding: 20px;
-}
-
-.page-title {
-  font-size: 24px;
-  font-weight: 600;
-  margin-bottom: 24px;
-  color: #06173c;
-}
-
-.favoris-container {
-  background-color: #ffffff;
-  border-radius: 8px;
-  padding: 24px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  min-height: 400px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.placeholder-text {
-  color: #8a94a6;
-  font-size: 16px;
-}
+/* Pas de styles spécifiques nécessaires ici, tout est géré dans indexFavoriView.vue */
 </style>

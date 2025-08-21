@@ -55,6 +55,11 @@
           </span>
           <span v-else>Vous</span>
         </template>
+        <template #favoris="slotProps">
+          <button class="btn btn-sm btn-link p-0" @click.stop="addToFavorites(slotProps.data)">
+            <i class="fas fa-star" :class="{ 'text-warning': slotProps.data.is_favorite, 'text-muted': !slotProps.data.is_favorite }"></i>
+          </button>
+        </template>
       </AsdecodeTable>
     </div>
   </div>
@@ -160,6 +165,13 @@ export default defineComponent({
                     sortable: true,
                     className: '',
                     filterable: true
+                },
+                {
+                    key: 'favoris',
+                    label: 'Favoris',
+                    sortable: false,
+                    className: 'text-center',
+                    filterable: false
                 }
             ]
         }
@@ -311,6 +323,50 @@ export default defineComponent({
         
         getSelection(selection) {
             this.selection = selection;
+        },
+        
+        addToFavorites(document) {
+            console.log('Ajout aux favoris:', document);
+            
+            // Créer un objet avec uniquement les données nécessaires pour éviter les références circulaires
+            const documentData = {
+                document_id: document.id
+            };
+            
+            // Appel à l'API pour ajouter/retirer des favoris
+            this.apiClient.post('/favoris', documentData)
+            .then(response => {
+                console.log('Document ajouté aux favoris:', response.data);
+                
+                // Mettre à jour l'état visuel de l'étoile
+                document.is_favorite = true;
+                
+                // Afficher une notification de succès
+                this.$toast.add({
+                    severity: 'success',
+                    summary: 'Succès',
+                    detail: 'Document ajouté aux favoris',
+                    life: 3000
+                });
+            })
+            .catch(error => {
+                console.error('Erreur lors de l\'ajout aux favoris:', error);
+                console.error('Détails de l\'erreur:', error.response ? error.response.data : 'Pas de réponse');
+                console.error('Status code:', error.response ? error.response.status : 'Inconnu');
+                
+                // Message d'erreur plus détaillé
+                const errorMessage = error.response && error.response.data && error.response.data.message
+                    ? error.response.data.message
+                    : 'Impossible d\'ajouter ce document aux favoris';
+                
+                // Afficher une notification d'erreur
+                this.$toast.add({
+                    severity: 'error',
+                    summary: 'Erreur',
+                    detail: errorMessage,
+                    life: 5000
+                });
+            });
         }
     }
 });

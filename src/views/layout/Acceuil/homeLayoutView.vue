@@ -5,7 +5,7 @@
       <div class="container">
         <a class="navbar-brand" href="#">
           <i class="fas fa-cloud text-primary me-2"></i>
-          Yam's_Drive
+          Yam's Drive
         </a>
         <div class="d-flex">
           <!-- <ul class="navbar-nav me-auto mb-2 mb-lg-0 d-flex flex-row">

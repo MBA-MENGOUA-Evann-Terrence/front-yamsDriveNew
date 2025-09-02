@@ -4,29 +4,27 @@
       {{ errorMessage }}
     </div>
     <div class="input-group">
-      <label for="loginEmail">
+      <label for="loginEmail">Adresse Email</label>
+      <div class="input-wrapper">
         <i class="fas fa-envelope input-icon"></i>
-        Adresse Email
-      </label>
-      <input
-        type="email"
-        class="input-field"
-        id="loginEmail"
-        v-model="loginForm.email"
-        required
-        placeholder="votre@email.com"
-      >
+        <input
+          type="email"
+          class="input-field"
+          id="loginEmail"
+          v-model="loginForm.email"
+          required
+          placeholder="votre@email.com"
+        >
+      </div>
     </div>
 
     <div class="input-group">
-      <label for="loginPassword">
-        <i class="fas fa-lock input-icon"></i>
-        Mot de passe
-      </label>
+      <label for="loginPassword">Mot de passe</label>
       <div class="input-wrapper">
+        <i class="fas fa-lock input-icon"></i>
         <input
           :type="showPassword ? 'text' : 'password'"
-          class="input-field"
+          class="input-field password-field"
           id="loginPassword"
           v-model="loginForm.password"
           required
@@ -131,33 +129,39 @@ export default defineComponent({
 }
 
 .input-group label {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem; /* Espace entre l'icône et le texte */
   color: white;
-  margin-bottom: 0.75rem; /* Espace augmenté sous le label */
+  margin-bottom: 0.75rem;
   font-size: 1rem;
   text-align: left;
   font-weight: 400;
-}
-
-.input-icon {
-  color: rgba(255, 255, 255, 0.6);
 }
 
 .input-wrapper {
   position: relative;
 }
 
+.input-icon {
+  position: absolute;
+  left: 1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.6);
+  pointer-events: none;
+}
+
 .input-field {
   width: 100%;
-  padding: 1rem 1.25rem;
+  padding: 1rem 1.25rem 1rem 3.5rem; /* Padding à gauche pour l'icône */
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px; /* Coins plus arrondis */
+  border-radius: 12px;
   color: white;
   font-size: 1rem;
   transition: var(--transition);
+}
+
+.password-field {
+  padding-right: 3.5rem; /* Padding à droite pour l'icône oeil */
 }
 
 .input-field::placeholder {

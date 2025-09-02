@@ -49,9 +49,6 @@
       <!-- Modifier l'affichage de la colonne Actions -->
       <template #actions="slotProps">
         <div class="action-buttons">
-          <button class="btn btn-sm btn-icon" @click.stop="toggleFavorite(slotProps.data)" :disabled="favoriteInProgress === slotProps.data.id">
-            <i :class="[slotProps.data.favorite ? 'fas' : 'far', 'fa-star', slotProps.data.favorite ? 'text-warning' : '']"></i>
-          </button>
           <button class="btn btn-sm btn-icon" @click.stop="showContextMenu(slotProps.data, $event)">
             <i class="fas fa-ellipsis-v"></i>
           </button>
@@ -122,10 +119,6 @@
       <div class="context-menu-item" @click="openFile(contextMenu.file)">
         <i class="fas fa-external-link-alt"></i> Ouvrir
       </div>
-      <div class="context-menu-item" @click="toggleFavorite(contextMenu.file)">
-        <i :class="[contextMenu.file && contextMenu.file.favorite ? 'fas' : 'far', 'fa-star']"></i>
-        {{ contextMenu.file && contextMenu.file.favorite ? 'Retirer des favoris' : 'Ajouter aux favoris' }}
-      </div>
       <div class="context-menu-item" @click="downloadFile(contextMenu.file)">
         <i class="fas fa-download"></i> Télécharger
       </div>
@@ -170,7 +163,6 @@ export default defineComponent({
       sortDirection: 'desc',
       selectedPeriod: 'all',
       selectedQuickPeriod: 'today',
-      favoriteInProgress: null,
       
       // Références DOM pour animations
       pageTitle: null,
@@ -381,54 +373,7 @@ export default defineComponent({
       return period ? period.name : '';
     },
     
-    // Gestion des favoris
-    async toggleFavorite(file) {
-      // Éviter les actions multiples sur le même fichier
-      if (this.favoriteInProgress === file.id) {
-        return;
-      }
-      
-      this.favoriteInProgress = file.id;
-      
-      try {
-        // Déterminer si on ajoute ou supprime des favoris
-        if (!file.favorite) {
-          // Ajout aux favoris
-          await axios.post('/api/favoris', {
-            document_id: file.id
-          });
-          file.favorite = true;
-        } else {
-          // Suppression des favoris
-          await axios.delete(`/api/favoris/${file.id}`);
-          file.favorite = false;
-        }
-      } catch (error) {
-        console.error('Erreur lors de la modification des favoris:', error);
-        // Afficher un message d'erreur à l'utilisateur
-        alert('Impossible de modifier les favoris. Veuillez réessayer.');
-      } finally {
-        this.favoriteInProgress = null;
-      }
-    },
     
-    // Méthode pour récupérer les favoris
-    async fetchFavorites() {
-      try {
-        const response = await axios.get('/api/favoris');
-        // Créer un ensemble des IDs de favoris pour une recherche plus rapide
-        const favoriteIds = new Set(response.data.map(fav => fav.document_id));
-        
-        // Marquer les documents favoris
-        if (Array.isArray(this.recentFiles)) {
-          this.recentFiles.forEach(file => {
-            file.favorite = favoriteIds.has(file.id);
-          });
-        }
-      } catch (error) {
-        console.error('Erreur lors de la récupération des favoris:', error);
-      }
-    },
     // Méthode pour récupérer les documents récents
     async fetchRecentDocuments() {
       this.isLoading = true;
@@ -448,6 +393,7 @@ export default defineComponent({
           if (Array.isArray(publishedRes.data)) {
             publishedDocs = publishedRes.data.map(doc => ({
               id: doc.id,
+              uuid: doc.uuid, // Ajout de l'UUID
               name: doc.name || doc.filename || 'Sans titre',
               type: this.getFileTypeFromExtension(doc.extension || ''),
               size: doc.size || 0,
@@ -459,6 +405,7 @@ export default defineComponent({
           } else if (publishedRes.data.data && Array.isArray(publishedRes.data.data)) {
             publishedDocs = publishedRes.data.data.map(doc => ({
               id: doc.id,
+              uuid: doc.uuid, // Ajout de l'UUID
               name: doc.name || doc.filename || 'Sans titre',
               type: this.getFileTypeFromExtension(doc.extension || ''),
               size: doc.size || 0,
@@ -475,6 +422,7 @@ export default defineComponent({
           if (Array.isArray(receivedRes.data)) {
             receivedDocs = receivedRes.data.map(doc => ({
               id: doc.document?.id || doc.id || 0,
+              uuid: doc.document?.uuid || doc.uuid, // Ajout de l'UUID
               name: doc.document?.name || doc.name || 'Document reçu',
               type: this.getFileTypeFromExtension(doc.document?.extension || doc.extension || ''),
               size: doc.document?.size || doc.size || 0,
@@ -486,6 +434,7 @@ export default defineComponent({
           } else if (receivedRes.data.data && Array.isArray(receivedRes.data.data)) {
             receivedDocs = receivedRes.data.data.map(doc => ({
               id: doc.document?.id || doc.id || 0,
+              uuid: doc.document?.uuid || doc.uuid, // Ajout de l'UUID
               name: doc.document?.name || doc.name || 'Document reçu',
               type: this.getFileTypeFromExtension(doc.document?.extension || doc.extension || ''),
               size: doc.document?.size || doc.size || 0,
@@ -500,8 +449,6 @@ export default defineComponent({
         // Fusionner les deux types de documents
         this.recentFiles = [...publishedDocs, ...receivedDocs];
         
-        // Récupérer les favoris pour marquer les documents
-        await this.fetchFavorites();
         
       } catch (err) {
         console.error('Erreur lors de la récupération des documents récents:', err);

@@ -210,7 +210,31 @@ export default defineComponent({
                 console.log('Réponse du serveur après partage:', response.data);
                 
                 this.toast?.add({ severity: 'success', summary: 'Succès', detail: 'Document partagé avec succès', life: 3000 });
-                // this.fetchExistingShares();
+
+                // **Nouvel appel pour envoyer l'email**
+                try {
+                    await apiClient.post(`/documents/${this.documentData.uuid}/send-email`, {
+                        email: this.email,
+                        message: this.message
+                    });
+                    this.toast?.add({ severity: 'info', summary: 'Information', detail: 'Un e-mail de partage a été envoyé.', life: 3000 });
+                } catch (emailError: any) {
+                    console.error("Erreur détaillée lors de l'envoi de l'e-mail:", emailError.response || emailError);
+
+                    let errorDetail = "l'envoi de l'e-mail a échoué.";
+                    if (emailError.response && emailError.response.data && emailError.response.data.message) {
+                        errorDetail = `l'envoi de l'e-mail a échoué: ${emailError.response.data.message}`;
+                    }
+
+                    this.toast?.add({ 
+                        severity: 'warn', 
+                        summary: 'Avertissement',
+                        detail: `Le document a été partagé, mais ${errorDetail}`,
+                        life: 7000 
+                    });
+                }
+
+                this.closeDialog(true); // true pour indiquer qu'il faut rafraîchir
             } catch (error: any) {
                 console.error('Erreur lors du partage du document:', error);
                 

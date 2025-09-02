@@ -4,7 +4,7 @@
         <button class="btn btn-sm btn-primary me-2" @click="onEditModal">
             <i class="fas fa-edit"></i> Modifier
         </button>
-        <button class="btn btn-sm btn-danger" @click="onDeleteLine" :disabled="isLoading">
+        <button class="btn btn-sm btn-danger" @click="onDelete" :disabled="isLoading">
             <i class="fas fa-trash-alt"></i> Supprimer
 
             <div v-show="isLoading" class="spinner-border spinner-border-sm" role="status">
@@ -32,7 +32,7 @@
 </template>
 
 <script>
-import $ from 'jquery'
+
 import FormService from './FormService.vue';
 
 export default {
@@ -61,42 +61,9 @@ export default {
                 data: this.dialogRef.data
             });
         },
-        onDeleteLine() {
-            //demander une confirmation avant de supprimer
-            if (!window.confirm("Etes vous sur de vouloir supprimer ?")) {
-                return
-            }
-            this.isLoading = true
-            this.axios.post('/api/services/' + this.service.id + '/destroy').then((response) => {
-                this.isLoading = false
-                if (response.data.success === true) {
-                    $('#refresh' + this.table).click()
-                    this.dialogRef.close()
-                    this.$toast.add({
-                        severity: 'success',
-                        detail: response.data.message,
-                        life: 3000
-                    });
-                }
-                else {
-                    response.data.errors.forEach(element => {
-                        this.$toast.add({
-                            severity: 'warn',
-                            summary: 'Oups !',
-                            detail: element,
-                            life: 20000
-                        });
-                    });
-                }
-            }).catch(() => {
-                this.isLoading = false
-                this.$toast.add({
-                    severity: 'error',
-                    summary: 'Probleme de connexion',
-                    detail: 'Une erreur s\'est produite lors de la connexion au serveur !',
-                    life: 5000
-                });
-            })
+                onDelete() {
+            // On ferme la modale et on passe l'info de suppression au parent
+            this.dialogRef.close({ delete: this.service });
         }
     }
 }

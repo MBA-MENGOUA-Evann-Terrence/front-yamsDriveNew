@@ -45,12 +45,12 @@
         <i class="fas fa-cloud text-primary me-2"></i>
         <span class="fw-bold">Yam'sDrive</span>
       </div>
-      <div class="header-center">
+      <!-- <div class="header-center">
         <div class="search-bar">
           <i class="fas fa-search search-icon"></i>
           <input type="text" placeholder="Rechercher..." class="search-input">
         </div>
-      </div>
+      </div> -->
       <div class="header-right">
         <!-- Section utilisateur connecté -->
         <router-link to="/dashboard/profil" class="user-profile">
@@ -66,12 +66,18 @@
       <!-- Barre latérale -->
       <aside class="dashboard-sidebar">
         <div class="sidebar-header">
-          <router-link to="/home" class="new-btn">
-            <i class="fas fa-home"></i> Accueil
-          </router-link>
+          <button @click="showCreateModal" class="new-btn">
+            <i class="fas fa-plus"></i> Nouveau
+          </button>
         </div>
         <nav class="sidebar-nav">
           <ul>
+            <li>
+              <router-link to="/home" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Accueil</span>
+              </router-link>
+            </li>
             <li>
               <router-link to="/dashboard/statistiques" class="nav-item">
                 <i class="fas fa-chart-bar"></i>
@@ -108,12 +114,12 @@
                 <span>Récents</span>
               </router-link>
             </li>
-            <li>
+            <!-- <li>
               <router-link to="/dashboard/favoris" class="nav-item">
                 <i class="fas fa-star"></i>
                 <span>Favoris</span>
               </router-link>
-            </li>
+            </li> -->
             <li>
               <router-link to="/dashboard/corbeille" class="nav-item">
                 <i class="fas fa-trash"></i>
@@ -153,11 +159,17 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import Dialog from 'primevue/dialog';
+import { useDialog } from 'primevue/usedialog';
+import FormDocument from '../Document/FormDocument.vue';
 
 export default defineComponent({
   name: 'LayoutDashView',
   components: {
     Dialog
+  },
+  setup() {
+    const dialog = useDialog();
+    return { dialog };
   },
   data() {
     return {
@@ -174,6 +186,15 @@ export default defineComponent({
     }
   },
   methods: {
+    showCreateModal() {
+      this.dialog.open(FormDocument, {
+          props: {
+              header: 'Ajouter un document',
+              style: { width: '50vw' },
+              modal: true,
+          }
+      });
+    },
     async logout() {
       try {
         await this.$store.dispatch('logout');

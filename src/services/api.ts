@@ -9,15 +9,15 @@ const apiClient = axios.create({
   }
 });
 
-// Récupère le token du localStorage au chargement du service
-console.log('Initialisation du client API...');
-const token = localStorage.getItem('auth_token');
-if (token) {
-  console.log('Token trouvé dans le localStorage, application à l\'en-tête Authorization.');
-  // Applique le token aux en-têtes pour les futures requêtes
-  apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-} else {
-  console.log('Aucun token trouvé dans le localStorage.');
-}
+// Intercepteur pour ajouter le token d'authentification à chaque requête
+apiClient.interceptors.request.use(config => {
+  const token = localStorage.getItem('auth_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+}, error => {
+  return Promise.reject(error);
+});
 
 export default apiClient;

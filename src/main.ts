@@ -35,6 +35,22 @@ axios.defaults.withCredentials = true
 axios.defaults.withXSRFToken = true
 // axios.defaults.baseURL = store.getters.apiUrl; // Commenté pour utiliser le proxy de dev
 
+// Intercepteur de requête pour injecter le token dynamiquement
+axios.interceptors.request.use(config => {
+  const mysession = window.localStorage.getItem("yamsdigital_session");
+  if (mysession) {
+    try {
+      const sessionData = JSON.parse(mysession);
+      if (sessionData && sessionData.data && sessionData.data.token) {
+        config.headers.Authorization = `Bearer ${sessionData.data.token}`;
+      }
+    } catch (e) {
+      console.error('Erreur lors de la lecture de la session pour l\'intercepteur:', e);
+    }
+  }
+  return config;
+});
+
 // Intercepteur pour gérer les erreurs d'authentification
 axios.interceptors.response.use(
   response => response,

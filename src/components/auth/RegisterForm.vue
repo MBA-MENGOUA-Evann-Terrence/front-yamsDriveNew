@@ -1,53 +1,53 @@
 <template>
   <form @submit.prevent="handleSubmit" class="auth-form" novalidate>
     <div class="input-group">
-      <label for="lastName">
+      <label for="lastName">Nom</label>
+      <div class="input-wrapper">
         <i class="fas fa-user input-icon"></i>
-        Nom
-      </label>
-      <input
-        class="input-field"
-        id="lastName"
-        v-model="registerForm.lastName"
-        type="text"
-        placeholder="Entrez votre nom"
-        :class="{ 'error': validationErrors.nom }"
-        required
-      />
+        <input
+          class="input-field"
+          id="lastName"
+          v-model="registerForm.lastName"
+          type="text"
+          placeholder="Entrez votre nom"
+          :class="{ 'error': validationErrors.nom }"
+          required
+        />
+      </div>
       <span v-if="validationErrors.nom" class="error-message">{{ validationErrors.nom[0] }}</span>
     </div>
 
     <div class="input-group">
-      <label for="firstName">
+      <label for="firstName">Prénom</label>
+      <div class="input-wrapper">
         <i class="fas fa-user input-icon"></i>
-        Prénom
-      </label>
-      <input
-        class="input-field"
-        id="firstName"
-        v-model="registerForm.firstName"
-        type="text"
-        placeholder="Entrez votre prénom"
-        :class="{ 'error': validationErrors.prenom }"
-        required
-      />
+        <input
+          class="input-field"
+          id="firstName"
+          v-model="registerForm.firstName"
+          type="text"
+          placeholder="Entrez votre prénom"
+          :class="{ 'error': validationErrors.prenom }"
+          required
+        />
+      </div>
       <span v-if="validationErrors.prenom" class="error-message">{{ validationErrors.prenom[0] }}</span>
     </div>
 
     <div class="input-group">
-      <label for="email">
+      <label for="email">Email</label>
+      <div class="input-wrapper">
         <i class="fas fa-envelope input-icon"></i>
-        Email
-      </label>
-      <input
-        class="input-field"
-        id="email"
-        v-model="registerForm.email"
-        type="email"
-        placeholder="Entrez votre email"
-        :class="{ 'error': validationErrors.email }"
-        required
-      />
+        <input
+          class="input-field"
+          id="email"
+          v-model="registerForm.email"
+          type="email"
+          placeholder="Entrez votre email"
+          :class="{ 'error': validationErrors.email }"
+          required
+        />
+      </div>
       <span v-if="validationErrors.email" class="error-message">{{ validationErrors.email[0] }}</span>
     </div>
 
@@ -210,9 +210,6 @@ export default defineComponent({
 }
 
 .input-group label {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
   color: white;
   margin-bottom: 0.75rem;
   font-size: 1rem;
@@ -220,13 +217,22 @@ export default defineComponent({
   font-weight: 400;
 }
 
+.input-wrapper {
+  position: relative;
+}
+
 .input-icon {
+  position: absolute;
+  left: 1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
   color: rgba(255, 255, 255, 0.6);
+  pointer-events: none; /* Empêche l'icône de bloquer les clics */
 }
 
 .input-field {
   width: 100%;
-  padding: 1rem 1.25rem;
+  padding: 1rem 1.25rem 1rem 3.5rem; /* Ajout de padding à gauche pour l'icône */
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;

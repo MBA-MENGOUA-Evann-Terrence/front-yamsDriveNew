@@ -1,9 +1,9 @@
 <template>
-    <form @submit.prevent="submitForm" enctype="multipart/form-data">
+    <form @submit.prevent="submitForm" enctype="multipart/form-data" class="document-form">
         <!-- Champ de téléversement (mode création uniquement) -->
         <div v-if="!isEditMode" class="field mb-3">
             <label>Fichier *</label>
-            <FileUpload name="fichier" @select="onFileSelect" :showUploadButton="false" :showCancelButton="false" :multiple="false">
+            <FileUpload name="fichier" @select="onFileSelect" :showUploadButton="false" :showCancelButton="false" :multiple="false" chooseLabel="Choisir un fichier">
                 <template #empty>
                     <p>Glissez et déposez un fichier ici.</p>
                 </template>
@@ -153,9 +153,92 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.document-form {
+    padding: 1rem;
+}
+
+.field label {
+    display: block;
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+    color: #333; /* Texte plus foncé pour fond clair */
+}
+
+/* Style pour les composants PrimeVue */
+:deep(.p-inputtext),
+:deep(.p-dropdown),
+:deep(.p-textarea) {
+    width: 100%;
+    background-color: #ffffff; /* Fond blanc */
+    border: 1px solid #ced4da; /* Bordure grise standard */
+    color: #495057; /* Couleur de texte standard */
+    border-radius: 8px;
+}
+
+:deep(.p-inputtext:focus),
+:deep(.p-dropdown:focus),
+:deep(.p-textarea:focus) {
+    box-shadow: 0 0 0 2px #4299e1; /* Ombre de focus */
+}
+
+/* Style pour la zone de téléversement */
+:deep(.p-fileupload) {
+    border: 2px dashed #ced4da; /* Bordure grise claire */
+    border-radius: 8px;
+    background-color: #ffffff; /* Fond blanc */
+    color: #495057; /* Texte foncé */
+    padding: 1rem;
+    transition: border-color 0.3s, background-color 0.3s;
+}
+
+:deep(.p-fileupload:hover) {
+    border-color: #4299e1;
+}
+
+:deep(.p-button.p-fileupload-choose) {
+    background-color: #6366f1;
+    border-color: #6366f1;
+}
+
+:deep(.p-fileupload-empty) {
+    padding: 1rem;
+    text-align: center;
+    color: #6c757d;
+}
+
+/* Style pour la liste des fichiers sélectionnés */
+:deep(.p-fileupload-file) {
+    border-bottom: 1px solid #4a5568;
+    padding: 1rem 0;
+}
+
+:deep(.p-fileupload-file-thumbnail) {
+    display: none; /* Cache la miniature si non nécessaire */
+}
+
+:deep(.p-fileupload-file-info) {
+    font-weight: 500;
+}
+
+:deep(.p-badge) {
+    background-color: #4a5568;
+}
+
+/* Style pour les boutons */
 .p-dialog-footer {
     display: flex;
     justify-content: flex-end;
-    padding-top: 1rem;
+    gap: 0.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #4a5568;
+    margin-top: 1.5rem;
+}
+
+:deep(.p-button-text) {
+    color: #6c757d;
+}
+
+:deep(.p-button) {
+    font-weight: 500;
 }
 </style>

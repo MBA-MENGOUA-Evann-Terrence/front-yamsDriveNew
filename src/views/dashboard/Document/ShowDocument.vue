@@ -1,5 +1,4 @@
 
-
 <template>
     <div>
         <!-- Contenu de la modale -->
@@ -32,9 +31,18 @@
         <!-- Actions en pied de page -->
         <div class="p-dialog-footer">
             <Button label="Télécharger" icon="pi pi-download" class="p-button-success" @click="downloadDocument" />
-            <Button v-if="!isFromRecentOrShared" label="Partager" icon="pi pi-share-alt" class="p-button-info" @click="shareDocument" />
-            <Button v-if="!isFromRecentOrShared" label="Supprimer" icon="pi pi-trash" class="p-button-danger" @click="deleteDocument" />
-            <Button label="Fermer" icon="pi pi-times" class="p-button-secondary" @click="closeDialog()" />
+            
+            <!-- Actions pour documents normaux -->
+            <template v-if="!isFromRecentOrShared && !isFromTrash">
+                <Button label="Partager" icon="pi pi-share-alt" class="p-button-info" @click="shareDocument" />
+                <Button label="Supprimer" icon="pi pi-trash" class="p-button-danger" @click="deleteDocument" />
+            </template>
+            
+            <!-- Actions pour documents dans la corbeille -->
+            <template v-if="isFromTrash">
+
+                <Button label="Supprimer définitivement" icon="pi pi-trash" class="p-button-danger" @click="forceDeleteDocument" />
+            </template>
         </div>
     </div>
 </template>
@@ -55,11 +63,8 @@ export default defineComponent({
     },
     inject: ['dialogRef'],
     data() {
-        console.log('ShowDocument - dialogRef.data:', this.dialogRef.data);
         const source = this.dialogRef.data.source || 'documents';
         const table = this.dialogRef.data.table || 'documents';
-        console.log('ShowDocument - source initialisée à:', source);
-        console.log('ShowDocument - table initialisée à:', table);
         return {
             document: this.dialogRef.data.document,
             imageError: false,
@@ -71,22 +76,15 @@ export default defineComponent({
     computed: {
         isFromRecentOrShared() {
             // Vérifie si le document provient des vues "Recent" ou "Partagé avec moi"
-            console.log('======== DEBUG isFromRecentOrShared ========');
-            console.log('this.source:', this.source, typeof this.source);
-            console.log('this.table:', this.table, typeof this.table);
-            console.log('this.document:', this.document);
-            console.log('dialogRef.data:', this.dialogRef.data);
-            
             // Vérifier la source explicite OU la table
             const sourceCheck = this.source === 'recent' || this.source === 'shared';
             const tableCheck = this.table === 'shared' || this.table === 'recent';
             const result = sourceCheck || tableCheck;
-            
-            console.log('sourceCheck (source === recent/shared):', sourceCheck);
-            console.log('tableCheck (table === shared/recent):', tableCheck);
-            console.log('isFromRecentOrShared final result:', result);
-            console.log('==========================================');
             return result;
+        },
+        isFromTrash() {
+            // Vérifie si le document provient de la corbeille
+            return this.source === 'trash' || this.table === 'trash';
         },
         extension() {
             if (!this.document.nom) return '';
@@ -134,7 +132,7 @@ export default defineComponent({
         downloadDocument() {
             try {
                 // Utiliser la route spécifique pour le téléchargement
-                const downloadUrl = `/api/documents/${this.document.id}/download`;
+                const downloadUrl = `/api/documents/${this.document.uuid}/download`;
                 
                 // Créer un lien et simuler un clic pour déclencher le téléchargement
                 const a = document.createElement('a');
@@ -189,136 +187,66 @@ export default defineComponent({
             }, 100);
         },
         deleteDocument() {
-            // Stocker les informations du document avant de fermer la vue
-            const documentToDelete = { ...this.document };
-            
-            // Fermer immédiatement la vue détaillée pour une meilleure expérience utilisateur
-            this.dialogRef.close();
-            
-            // Afficher la confirmation dans une popup séparée
+            this.closeDialog(); // Ferme la modale de détails
             this.$confirm.require({
-                message: 'Êtes-vous sûr de vouloir supprimer ce fichier ? Cette action est irréversible.',
+                message: 'Voulez-vous vraiment envoyer ce document à la corbeille ?',
                 header: 'Confirmation de suppression',
-                icon: 'pi pi-exclamation-triangle',
+                icon: 'pi pi-info-circle',
                 acceptClass: 'p-button-danger',
                 acceptLabel: 'Oui, supprimer',
                 rejectLabel: 'Annuler',
-                accept: () => {
+                accept: async () => {
                     this.isLoading = true;
-                    // Ajouter des logs pour déboguer la réponse du serveur
-                    console.log('Début de la suppression du document:', documentToDelete.uuid);
-                    
-                    axios.post('/api/documents/' + documentToDelete.uuid + '/destroy')
-                        .then((response) => {
-                            this.isLoading = false;
-                            console.log('Réponse du serveur après suppression:', response.data);
-                            
-                            // Considérer la suppression comme réussie même si la réponse n'est pas parfaite
-                            // tant que nous avons une réponse du serveur
-                            if (response.data && (response.data.success === true || response.status === 200)) {
-                                console.log('Suppression réussie, rafraîchissement de la liste...');
-                                
-                                // Essayer plusieurs méthodes de rafraîchissement pour maximiser les chances
-                                setTimeout(() => {
-                                    try {
-                                        // Méthode 1: Utiliser directement le bouton de rafraîchissement
-                                        const refreshButton = document.getElementById('refreshdocuments');
-                                        if (refreshButton) {
-                                            console.log('Bouton de rafraîchissement trouvé, clic...');
-                                            refreshButton.click();
-                                        }
-                                    } catch (e) {
-                                        console.error('Erreur lors du clic sur le bouton de rafraîchissement:', e);
-                                    }
-                                    
-                                    // Méthode 2: Utiliser jQuery comme fallback
-                                    try {
-                                        $('#refreshdocuments').click();
-                                        console.log('Tentative de rafraîchissement via jQuery');
-                                    } catch (e) {
-                                        console.error('Erreur lors du rafraîchissement via jQuery:', e);
-                                    }
-                                    
-                                    // Méthode 3: Forcer un rechargement de la page si rien d'autre ne fonctionne
-                                    setTimeout(() => {
-                                        window.location.href = '/dashboard/documents';
-                                    }, 1000);
-                                }, 500);
-                                
-                                // Afficher le toast de succès
-                                this.$toast.add({
-                                    severity: 'success',
-                                    summary: 'Succès',
-                                    detail: 'Document supprimé avec succès',
-                                    life: 3000
-                                });
-                            } else if (response.data.errors) {
-                                // Gestion des erreurs spécifiques retournées par l'API
-                                response.data.errors.forEach(element => {
-                                    this.$toast.add({
-                                        severity: 'warn',
-                                        summary: 'Oups !',
-                                        detail: element,
-                                        life: 20000
-                                    });
-                                });
-                            } else {
-                                // Cas où success est false mais pas d'erreurs spécifiques
-                                this.$toast.add({
-                                    severity: 'error',
-                                    summary: 'Erreur',
-                                    detail: response.data.message || 'Une erreur est survenue',
-                                    life: 3000
-                                });
-                            }
-                        })
-                        .catch((error) => {
-                            this.isLoading = false;
-                            console.error('Erreur lors de la suppression:', error);
-                            
-                            // Vérifier si l'erreur est due à une réponse du serveur
-                            if (error.response) {
-                                console.log('Données de réponse d\'erreur:', error.response.data);
-                                console.log('Statut de réponse d\'erreur:', error.response.status);
-                                
-                                // Si le statut est 200 ou 201, la suppression a probablement réussi malgré l'erreur
-                                if (error.response.status === 200 || error.response.status === 201) {
-                                    console.log('La suppression semble avoir réussi malgré l\'erreur, rafraîchissement...');
-                                    
-                                    // Rafraîchir la liste
-                                    setTimeout(() => {
-                                        try {
-                                            $('#refreshdocuments').click();
-                                            console.log('Tentative de rafraîchissement via jQuery');
-                                        } catch (e) {
-                                            console.error('Erreur lors du rafraîchissement via jQuery:', e);
-                                        }
-                                        
-                                        // Forcer un rechargement de la page si nécessaire
-                                        setTimeout(() => {
-                                            window.location.href = '/dashboard/documents';
-                                        }, 1000);
-                                    }, 500);
-                                    
-                                    // Afficher un toast de succès
-                                    this.$toast.add({
-                                        severity: 'success',
-                                        summary: 'Succès',
-                                        detail: 'Document supprimé avec succès',
-                                        life: 3000
-                                    });
-                                    return;
-                                }
-                            }
-                            
-                            // Afficher le message d'erreur standard
-                            this.$toast.add({
-                                severity: 'error',
-                                summary: 'Erreur de connexion',
-                                detail: 'Une erreur s\'est produite lors de la suppression.',
-                                life: 5000
-                            });
+                    try {
+                        // Utilisation de this.axios qui est l'instance configurée
+                        await this.axios.delete(`/api/documents/${this.document.uuid}`);
+                        this.$toast.add({
+                            severity: 'success',
+                            summary: 'Succès',
+                            detail: 'Le document a été déplacé vers la corbeille.',
+                            life: 3000
                         });
+                        // Émettre l'événement pour que la liste principale se rafraîchisse
+                        eventBus.emit(EVENTS.DOCUMENT_DELETED, this.document.uuid);
+                        this.closeDialog();
+                    } catch (error) {
+                        const msg = error.response?.data?.message || 'La suppression a échoué.';
+                        this.$toast.add({ severity: 'error', summary: 'Erreur', detail: msg, life: 5000 });
+                    } finally {
+                        this.isLoading = false;
+                    }
+                }
+            });
+        },
+
+        async forceDeleteDocument() {
+            this.closeDialog(); // Ferme la modale de détails
+            this.$confirm.require({
+                message: `Êtes-vous sûr de vouloir supprimer définitivement le document "${this.document.nom}" ? Cette action est irréversible.`,
+                header: 'Confirmation de suppression définitive',
+                icon: 'pi pi-exclamation-triangle',
+                acceptClass: 'p-button-danger',
+                acceptLabel: 'Oui, supprimer définitivement',
+                rejectLabel: 'Annuler',
+                accept: async () => {
+                    this.isLoading = true;
+                    try {
+                        await this.axios.delete(`/api/documents/${this.document.uuid}/force`);
+                        this.$toast.add({
+                            severity: 'success',
+                            summary: 'Succès',
+                            detail: 'Le document a été supprimé définitivement.',
+                            life: 3000
+                        });
+                        // Émettre un événement pour rafraîchir la corbeille
+                        eventBus.emit(EVENTS.DOCUMENT_FORCE_DELETED, this.document.uuid);
+                        this.closeDialog();
+                    } catch (error) {
+                        const msg = error.response?.data?.message || 'La suppression a échoué.';
+                        this.$toast.add({ severity: 'error', summary: 'Erreur', detail: msg, life: 5000 });
+                    } finally {
+                        this.isLoading = false;
+                    }
                 }
             });
         },

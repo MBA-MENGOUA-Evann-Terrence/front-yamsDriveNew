@@ -45,7 +45,6 @@ export const authService = {
 
       if (token) {
         localStorage.setItem('auth_token', token);
-        apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       }
       return response.data;
     } catch (error: any) {
@@ -78,8 +77,8 @@ export const authService = {
       console.error('Erreur lors de la notification de déconnexion au serveur.', error);
     } finally {
       // Supprime les informations d'authentification du client quoi qu'il arrive
+      // Supprime le token du localStorage. L'intercepteur ne l'ajoutera plus aux futures requêtes.
       localStorage.removeItem('auth_token');
-      delete apiClient.defaults.headers.common['Authorization'];
     }
   },
 
@@ -95,15 +94,12 @@ export const authService = {
       // Si le token est invalide (401), on le supprime pour nettoyer la session
       if (error.response && error.response.status === 401) {
         localStorage.removeItem('auth_token');
-        delete apiClient.defaults.headers.common['Authorization'];
+        localStorage.removeItem('yamsdigital_session');
       }
       throw error;
     }
   }
 };
-
-
-
 
 
 

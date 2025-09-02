@@ -41,5 +41,7 @@ export const eventBus = reactive({
 export const EVENTS = {
   DOCUMENT_DELETED: 'document:deleted',
   DOCUMENT_CREATED: 'document:created',
-  DOCUMENT_UPDATED: 'document:updated'
+  DOCUMENT_UPDATED: 'document:updated',
+  DOCUMENT_RESTORED: 'document:restored',
+  DOCUMENT_FORCE_DELETED: 'document:force_deleted'
 };

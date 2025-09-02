@@ -8,6 +8,8 @@
     </div>
     <div class="card-body">
       <AsdecodeTable 
+        ref="serviceTable"
+        :key="tableKey"
         :columns="columns" 
         url="/api/services" 
         table="services" 
@@ -68,6 +70,7 @@ export default defineComponent({
 
     data() {
         return {
+            tableKey: 0,
             lines: 0,
             selection: [],
             columns: [
@@ -87,18 +90,51 @@ export default defineComponent({
         }
     },
     methods: {
+        refreshTable() {
+            this.tableKey++;
+        },
         showLine(line) {
             this.$dialog.open(ShowService, {
                 props: {
-                    header: 'Service '+line.id,
+                    header: 'Détails du service',
                     style: { width: '50vw' },
                     modal: true,
                 },
-                data: line
+                data: line,
+                onClose: (options) => {
+                    if (options && options.data) {
+                        if (options.data.refresh) {
+                            this.refreshTable();
+                        }
+                        if (options.data.delete) {
+                            this.confirmDeleteService(options.data.delete);
+                        }
+                    }
+                }
             });
         },
         updateLines(nb) {
             this.lines = nb
+        },
+        confirmDeleteService(service) {
+            this.$confirm.require({
+                message: `Êtes-vous sûr de vouloir supprimer le service ${service.nom} ?`,
+                header: 'Confirmation de suppression',
+                icon: 'pi pi-exclamation-triangle',
+                acceptClass: 'p-button-danger',
+                acceptLabel: 'Oui, supprimer',
+                rejectLabel: 'Annuler',
+                accept: async () => {
+                    try {
+                        await this.axios.post(`/api/services/${service.id}/destroy`);
+                        this.$toast.add({ severity: 'success', summary: 'Succès', detail: 'Service supprimé.', life: 3000 });
+                        this.refreshTable();
+                    } catch (error) {
+                        const msg = error.response?.data?.message || 'La suppression a échoué.';
+                        this.$toast.add({ severity: 'error', summary: 'Erreur', detail: msg, life: 5000 });
+                    }
+                }
+            });
         },
         showCreateModal() {
             this.$dialog.open(FormService, {

@@ -55,11 +55,6 @@
           </span>
           <span v-else>Vous</span>
         </template>
-        <template #favoris="slotProps">
-          <button class="btn btn-sm btn-link p-0" @click.stop="addToFavorites(slotProps.data)">
-            <i class="fas fa-star" :class="{ 'text-warning': slotProps.data.is_favorite, 'text-muted': !slotProps.data.is_favorite }"></i>
-          </button>
-        </template>
       </AsdecodeTable>
     </div>
   </div>
@@ -166,13 +161,6 @@ export default defineComponent({
                     className: '',
                     filterable: true
                 },
-                {
-                    key: 'favoris',
-                    label: 'Favoris',
-                    sortable: false,
-                    className: 'text-center',
-                    filterable: false
-                }
             ]
         }
     },

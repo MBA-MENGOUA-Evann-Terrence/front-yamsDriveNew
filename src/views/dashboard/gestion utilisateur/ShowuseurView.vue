@@ -85,58 +85,39 @@ export default {
                 data: this.user
             });
         },
-        confirmDelete() {
-            // Stocker les données de l'utilisateur avant de fermer la vue
-            const userData = { ...this.user };
-            
-            // Fermer d'abord la vue de détail
-            this.dialogRef.close();
-            
-            // Ensuite afficher la confirmation de suppression
-            setTimeout(() => {
-                this.$confirm.require({
-                    message: `Êtes-vous sûr de vouloir supprimer l'utilisateur ${userData.name} ?`,
-                    header: 'Confirmation de suppression',
-                    icon: 'pi pi-exclamation-triangle',
-                    acceptClass: 'p-button-danger',
-                    accept: () => {
-                        this.deleteUser(userData);
-                    },
-                    reject: () => {
-                        // Action annulée
-                    }
-                });
-            }, 100); // Petit délai pour assurer la fermeture de la vue avant l'affichage de la confirmation
+        confirmDelete(event) {
+            this.dialogRef.close(); // Ferme la modale de détails
+            this.$confirm.require({
+                target: event.currentTarget,
+                message: `Êtes-vous sûr de vouloir supprimer l'utilisateur ${this.user.name} ?`,
+                header: 'Confirmation de suppression',
+                icon: 'pi pi-exclamation-triangle',
+                acceptClass: 'p-button-danger',
+                acceptLabel: 'Oui, supprimer',
+                rejectLabel: 'Annuler',
+                accept: () => {
+                    this.deleteUser();
+                },
+            });
         },
-        async deleteUser(userData) {
+        async deleteUser() {
             try {
-                // Utiliser les données utilisateur passées en paramètre car la vue est déjà fermée
-                const response = await this.axios.delete(`/api/users/${userData.id}`);
-                
-                // Vérification améliorée de la réponse
-                if (response.data.success || response.status === 200 || response.status === 204) {
-                    // Émettre un événement pour rafraîchir la liste
-                    this.$emit('refresh-users');
-                    
-                    // Rafraîchir la page pour mettre à jour la liste
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 500);
-                    
-                    // Afficher un message de succès en vert
-                    this.$toast.add({
-                        severity: 'success',
-                        summary: 'Succès',
-                        detail: response.data.message || `Utilisateur ${userData.name} supprimé avec succès`,
-                        life: 3000
-                    });
-                } else {
-                    // Erreur seulement si explicitement indiqué
-                    this.handleError(response.data.errors || ['La suppression a échoué']);
-                }
+                await this.axios.delete(`/api/users/${this.user.id}`);
+                this.$toast.add({
+                    severity: 'success',
+                    summary: 'Succès',
+                    detail: `Utilisateur ${this.user.name} supprimé avec succès`,
+                    life: 3000
+                });
+                this.dialogRef.close({ success: true });
             } catch (error) {
                 console.error('Erreur lors de la suppression:', error);
-                this.handleError(['Une erreur est survenue lors de la suppression']);
+                this.$toast.add({
+                    severity: 'error',
+                    summary: 'Erreur',
+                    detail: 'La suppression a échoué',
+                    life: 3000
+                });
             }
         },
         handleError(errors) {

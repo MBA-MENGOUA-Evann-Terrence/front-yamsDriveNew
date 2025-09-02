@@ -45,7 +45,7 @@ export default createStore<RootState>({
           commit('SET_AUTH_STATUS', true);
 
           // Configurer l'en-tête d'autorisation pour les requêtes futures
-          axios.defaults.headers.common['Authorization'] = 'Bearer ' + apiResponse.token;
+          // axios.defaults.headers.common['Authorization'] = 'Bearer ' + apiResponse.token;
 
           // Créer l'objet de session à sauvegarder
           const sessionToSave = {
